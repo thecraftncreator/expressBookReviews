@@ -6,13 +6,21 @@ const public_users = express.Router();
 
 
 public_users.post("/register", (req,res) => {
-    var count = 0;
-    for (var i in users) {if (users.hasOwnProperty(i)) count++;}
-    users.push({
-        username:req.params.username,
-        password:req.params.password
-    });
-    res.send(JSON.stringify(users[count],null,4));
+    const username = req.body.username;
+    const password = req.body.password;
+    // Check if both username and password are provided
+    if (username && password) {
+        // Check if the user does not already exist
+        if (!isValid(username)) {
+            // Add the new user to the users array
+            users.push({"username": username, "password": password});
+            return res.status(200).json({message: "User successfully registered. Now you can login"});
+        } else {
+            return res.status(404).json({message: "User already exists!"});
+        }
+    }
+    // Return error if username or password is missing
+    return res.status(404).json({message: "Unable to register user."});
 });
 
 // Get the book list available in the shop
@@ -51,5 +59,6 @@ public_users.get('/review/:isbn',function (req, res) {
     //Well, I guess they ARE empty after all.
     res.send(JSON.stringify(books[req.params.isbn].reviews,null,4));
 });
+
 
 module.exports.general = public_users;
